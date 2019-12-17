@@ -3,6 +3,7 @@ title: "Customer Segmentation using K-Means Clustering"
 author: "Subha Yoganandan"
 date: "12/12/2019"
 output: github_document
+always_allow_html: yes
 ---
 Market segmentation is the process of dividing a broad consumer or business market, normally consisting of existing and potential customers, into sub-groups of consumers (known as segments) based on some type of shared characteristics. In dividing or segmenting markets, researchers typically look for common characteristics such as shared needs, common interests, similar lifestyles or even similar demographic profiles. The overall aim of segmentation is to identify high yield segments – that is, those segments that are likely to be the most profitable or that have growth potential – so that these can be selected for special attention (i.e. become target markets). [Source: Wikipedia]
 

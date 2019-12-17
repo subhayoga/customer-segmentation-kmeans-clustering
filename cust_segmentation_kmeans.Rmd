@@ -1,0 +1,138 @@
+---
+title: "Customer Segmentation using K-Means Clustering"
+author: "Subha Yoganandan"
+date: "12/12/2019"
+output: github_document
+---
+Market segmentation is the process of dividing a broad consumer or business market, normally consisting of existing and potential customers, into sub-groups of consumers (known as segments) based on some type of shared characteristics. In dividing or segmenting markets, researchers typically look for common characteristics such as shared needs, common interests, similar lifestyles or even similar demographic profiles. The overall aim of segmentation is to identify high yield segments – that is, those segments that are likely to be the most profitable or that have growth potential – so that these can be selected for special attention (i.e. become target markets). [Source: Wikipedia]
+
+First a little introduction of the K-Means algorithm which I am going to implement here. The following process describes how this method is implemented.
+
+1. k initial "means" are randomly generated within the data domain.
+
+2. k clusters are created by associating every observation with the nearest mean.
+
+3. The centroid of each of the k clusters becomes the new mean.
+
+4. Steps 2 and 3 are repeated until convergence has been reached.
+
+[Source: Wikipedia]
+
+In this blog I am looking to implement a K-Means clustering algorithm to a dataset from the trusted UCI Machine Learning Repository. The Wholesale Customers dataset consists of 8 attributes and 440 Instances. It can be downloaded from here.
+
+Attribute Information:
+
+1) FRESH: annual spending (m.u.) on fresh products (Continuous);
+2) MILK: annual spending (m.u.) on milk products (Continuous);
+3) GROCERY: annual spending (m.u.)on grocery products (Continuous);
+4) FROZEN: annual spending (m.u.)on frozen products (Continuous)
+5) DETERGENTS_PAPER: annual spending (m.u.) on detergents and paper products (Continuous)
+6) DELICATESSEN: annual spending (m.u.)on and delicatessen products (Continuous);
+7) CHANNEL: customersâ€™ Channel - Horeca (Hotel/Restaurant/CafÃ©) or Retail channel (Nominal)
+8) REGION: customersâ€™ Region â€“ Lisnon, Oporto or Other (Nominal)
+Descriptive Statistics:
+
+(Minimum, Maximum, Mean, Std. Deviation)
+FRESH ( 3, 112151, 12000.30, 12647.329)
+MILK (55, 73498, 5796.27, 7380.377)
+GROCERY (3, 92780, 7951.28, 9503.163)
+FROZEN (25, 60869, 3071.93, 4854.673)
+DETERGENTS_PAPER (3, 40827, 2881.49, 4767.854)
+DELICATESSEN (3, 47943, 1524.87, 2820.106)
+
+REGION Frequency
+Lisbon 77
+Oporto 47
+Other Region 316
+Total 440
+
+CHANNEL Frequency
+Horeca 298
+Retail 142
+Total 440
+
+Now let us jump straight into the code.
+
+
+```{r}
+#Call necessary libraries
+library(corrplot)
+#Read the input file
+
+wholecust <- read.csv(url("http://archive.ics.uci.edu/ml/machine-learning-databases/00292/Wholesale%20customers%20data.csv"))
+
+```
+
+Now, let's understand the dataset by having a peak of the data
+
+```{r}
+head(wholecust)
+```
+
+We can also get a useful summary from the dataset
+
+```{r}
+summary(wholecust)
+```
+
+Let us now explore the dataset more and find out strong correlations among variables.
+
+```{r}
+#Identify strong correlations
+w <- cor(wholecust)
+corrplot(w, method="number")
+```
+
+From the above diagram we can see that there is strong correlation among the Detergents_Paper and Grocery.
+
+Now we need to find the optimal number of cluster K. Determining the number of clusters in a data set, a quantity often labelled k as in the k-means algorithm, is a frequent problem in data clustering, and is a distinct issue from the process of actually solving the clustering problem. The elbow method looks at the percentage of variance explained as a function of the number of clusters: One should choose a number of clusters so that adding another cluster doesn't give much better modeling of the data. More precisely, if one plots the percentage of variance explained by the clusters against the number of clusters, the first clusters will add much information (explain a lot of variance), but at some point the marginal gain will drop, giving an angle in the graph. The number of clusters is chosen at this point, hence the "elbow criterion".  [Source: Wikipedia]
+
+```{r}
+set.seed(123)
+k.max <- 15
+data <- as.matrix(scale(wholecust[,(3:8)]))
+
+wss <- sapply(1:k.max, 
+ function(k){kmeans(data, k, nstart=50,iter.max = 15 )$tot.withinss})
+
+plot(1:k.max, wss,
+ type="b", pch = 19, frame = FALSE, 
+ xlab="Number of clusters",
+ ylab="Sum of squares")
+```
+
+From the above plot we can see that 3 or 5 is the optimal number of clusters, as we can see that after these numbers the curve remains less changing.
+
+Let us plot out the clusters for both the scenarios
+
+```{r}
+kmm <- kmeans(wholecust[,(3:8)], 3)
+kmm
+```
+
+Now let's implement K means for k=5
+
+```{r}
+ kmm <- kmeans(wholecust[,(3:8)], 5)
+ kmm
+```
+
+Let us closely look at the cluster means of both scenarios:
+
+Scenario 1: k = 3
+
+Cluster 1 - highest fresh-products.
+Cluster 2 - low spenders.
+Cluster 3 - highest milk, grocery, detergents_papers spenders.
+
+Scenario 2: k = 5
+
+Cluster 1 - low spenders
+Cluster 2 - highest Fresh spenders
+Cluster 3 - mediocre spenders
+Cluster 4 - low spenders
+Cluster 5 - mediocre Fresh, highest milk, Grocery, detergents_papers
+
+From the above 2 analysis we can see that 3 clusters prove to be the base optimal number for quickly understanding the customer segmentation.
+
+Possible extensions to the project is to use Principal Component Analysis for dimensionality reduction.
